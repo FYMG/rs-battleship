@@ -1,18 +1,12 @@
-import wsBroadcast from '../../../utils/helpers/wsBroadcast';
 import { wsTypes } from '../../../utils/consts';
-import { getUsersList } from '../../../data';
+import { getWinnersList } from '../../../data';
+import IHandleDataParams from '../../../models/HandleDataParams';
+import wsSend from '../../../utils/helpers/wsSend';
 
-function updateWinners() {
-  const wsList = getUsersList()
-    .map((p) => p.ws)
-    .filter((w) => w !== null);
-  const data = getUsersList()
-    .sort((a, b) => b.wins - a.wins)
-    .map((p) => ({ name: p.name, wins: p.wins }));
-
-  wsBroadcast(wsList, {
+function updateWinners({ ws }: IHandleDataParams) {
+  wsSend(ws, {
     type: wsTypes.updateWinners,
-    data,
+    data: getWinnersList(),
   });
 }
 

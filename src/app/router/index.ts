@@ -7,17 +7,15 @@ import validateObject from '../../utils/helpers/validateObject';
 import IHandleMessageParams from '../../models/HandleMessageParams';
 import handleRegUser from './user/reg';
 import wsSend from '../../utils/helpers/wsSend';
+import handleCreateRoom from './room/create';
 
 function handleMessage(params: IHandleMessageParams) {
   const { ws, message, clientId } = params;
   console.log(t('ws-client-message', { clientId, message }));
   try {
     const data = parseRequest<IWsRequest>(message);
-    if (typeof data.data === 'string') {
-      data.data = parseRequest(data.data);
-    }
+    if (typeof data.data === 'string') data.data = parseRequest(data.data);
     validateObject(wsRequestSchema, data);
-    console.log(data);
     const { type } = data;
     const handleParams = {
       ...params,
@@ -28,17 +26,20 @@ function handleMessage(params: IHandleMessageParams) {
       case wsTypes.reg:
         handleRegUser(handleParams);
         break;
+      case wsTypes.createRoom:
+        handleCreateRoom(handleParams);
+        break;
       default:
         break;
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : t('server-unknown-error');
+    const errorText = error instanceof Error ? error.message : t('server-unknown-error');
     wsSend(ws, {
       type: wsTypes.error,
       error: true,
-      errorText: message,
+      errorText,
     });
-    console.log('ws error:', message);
+    console.log('ws error:', errorText);
   }
 }
 

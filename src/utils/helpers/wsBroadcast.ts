@@ -13,15 +13,18 @@ function wsBroadcast(
     data: Record<PropertyKey, any>;
     error?: boolean;
     errorText?: string;
-  }
+  },
+  withError = false
 ) {
   const msg = JSON.stringify({
     type,
-    data: JSON.stringify({
-      ...data,
-      error,
-      errorText,
-    }),
+    data: withError
+      ? JSON.stringify({
+          ...data,
+          error,
+          errorText,
+        })
+      : JSON.stringify(data),
     id: 0,
   });
 

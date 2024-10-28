@@ -4,14 +4,17 @@ import { getUserByName, usersMap } from '../../../data';
 import { wsTypes } from '../../../utils/consts';
 import wsSend from '../../../utils/helpers/wsSend';
 import { t } from '../../../utils/loc';
+import updateWinnersBroadcast from './updateWinnersBroadcast';
 import updateWinners from './updateWinners';
+import updateRoom from '../room/update';
 
 interface IRegData {
   name: string;
   password: string;
 }
 
-function handleRegUser({ ws, data, clientId }: IHandleDataParams) {
+function handleRegUser(params: IHandleDataParams) {
+  const { ws, data, clientId } = params;
   validateObject(
     {
       name: 'string',
@@ -48,17 +51,25 @@ function handleRegUser({ ws, data, clientId }: IHandleDataParams) {
 
   usersMap.set(clientId, user);
 
-  wsSend(ws, {
-    type: wsTypes.reg,
-    data: {
-      name,
-      index: clientId,
+  wsSend(
+    ws,
+    {
+      type: wsTypes.reg,
+      data: {
+        name,
+        index: clientId,
+      },
     },
-  });
+    true
+  );
 
   if (!userExists) {
-    updateWinners();
+    updateWinnersBroadcast(params);
+  } else {
+    updateWinners(params);
   }
+
+  updateRoom(params);
 }
 
 export default handleRegUser;
