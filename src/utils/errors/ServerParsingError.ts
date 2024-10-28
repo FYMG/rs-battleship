@@ -1,30 +1,24 @@
 import ServerError from './ServerError';
 import { t } from '../loc';
 
-export enum ExpectedType {
-  string = 'string',
-  number = 'number',
-  boolean = 'boolean',
-  array = 'array',
-  object = 'object',
-  date = 'date',
-  uuid = 'uuid',
-  unexpected = 'unexpected',
-}
-
 export interface ServerParsingErrorArgs {
   field: string;
-  expectedType: ExpectedType;
+  expectedType: string;
+  gotValue: unknown;
 }
 
 export default class ServerParsingError extends ServerError {
   field: string;
 
-  expectedType: ExpectedType;
+  expectedType: string;
 
-  constructor({ field, expectedType }: ServerParsingErrorArgs) {
-    super(t('server-parse-error', { field, expectedType }));
+  gotValue: string;
+
+  constructor({ field, expectedType, gotValue }: ServerParsingErrorArgs) {
+    const gotValueString = String(gotValue);
+    super(t('server-parse-error', { field, expectedType, gotValue: gotValueString }));
     this.field = field;
+    this.gotValue = gotValueString;
     this.expectedType = expectedType;
     this.name = 'ServerParsingError';
   }

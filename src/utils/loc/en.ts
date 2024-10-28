@@ -1,8 +1,8 @@
 const loc: Record<string, string> = {
   'server-started': `
 ============================
-Server successfully started!
-Url: localhost:{{port}};
+{{serverName}} successfully started!
+Url: {{url}}:{{port}};
 Listening on port {{port}};
 ============================
   `,
@@ -12,8 +12,8 @@ Listening on port {{port}};
   'server-invalid-json-format': 'Invalid JSON format',
   'server-data-not-provided': 'Data not provided',
   'endpoint-not-found': 'Endpoint not found, please check your URL',
-  'server-unknown-error': 'Iternal server error. Oops, something went wrong',
-  'server-parse-error': 'Field {{field}} should be {{expectedType}}',
+  'server-unknown-error': 'Iternal server error',
+  'server-parse-error': 'Field {{field}} should be {{expectedType}} but got {{gotValue}}',
 };
 
 export default loc;

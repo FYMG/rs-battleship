@@ -1,5 +1,6 @@
-const endpoints = {
-  users: '/api/users/',
+const wsTypes = {
+  reg: 'reg',
+  unknown: 'unknown',
 };
 
-export { endpoints };
+export { wsTypes };

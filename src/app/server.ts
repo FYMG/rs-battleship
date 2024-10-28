@@ -15,10 +15,19 @@ function start({ port }: StartParams) {
 
   const wss = new WebSocketServer({ port });
 
-  wss.on('listening', () => console.log(t('server-started', { port: String(port) })));
+  wss.on('listening', () =>
+    console.log(
+      t('server-started', {
+        port: String(port),
+        serverName: 'RS Battleship webSocket server',
+        url: 'localhost',
+      })
+    )
+  );
 
   wss.on('connection', (ws: WebSocket) => {
-    const clientId = (id += 1).toString();
+    id += 1;
+    const clientId = id.toString();
     clients.set(clientId, ws);
     console.log(t('ws-client-connected', { clientId }));
 
