@@ -1,6 +1,7 @@
 const wsTypes = {
   reg: 'reg',
-  unknown: 'unknown',
+  error: 'error',
+  updateWinners: 'update_winners',
 };
 
 export { wsTypes };

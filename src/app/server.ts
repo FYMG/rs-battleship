@@ -1,12 +1,10 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import * as console from 'node:console';
 import { t } from '../utils/loc';
-import DB from './db';
 import handleMessage from './router';
 
 export interface StartParams {
   port: number;
-  db: DB;
 }
 
 function start({ port }: StartParams) {

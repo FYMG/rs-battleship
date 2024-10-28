@@ -4,8 +4,8 @@ const loc: Record<string, string> = {
 {{serverName}} successfully started!
 Url: {{url}}:{{port}};
 Listening on port {{port}};
-============================
-  `,
+============================`,
+  'wrong-reg-data': 'Wrong registration data',
   'ws-client-connected': 'Client connected with id: {{clientId}}',
   'ws-client-disconnected': 'Client disconnected with id: {{clientId}}',
   'ws-client-message': 'Client with id: {{clientId}} sent message: {{message}}',

@@ -1,19 +1,15 @@
-import { WebSocket } from 'ws';
 import * as console from 'node:console';
 import { t } from '../../utils/loc';
 import parseRequest from '../../utils/helpers/parseJSON';
 import { wsTypes } from '../../utils/consts';
 import { IWsRequest, wsRequestSchema } from '../../models/wsRequest';
 import validateObject from '../../utils/helpers/validateObject';
+import IHandleMessageParams from '../../models/HandleMessageParams';
+import handleRegUser from './user/reg';
+import wsSend from '../../utils/helpers/wsSend';
 
-export interface HandleMessageParams {
-  ws: WebSocket;
-  message: string;
-  clientId: string;
-  clients: Map<string, WebSocket>;
-}
-
-function handleMessage({ ws, message, clientId }: HandleMessageParams) {
+function handleMessage(params: IHandleMessageParams) {
+  const { ws, message, clientId } = params;
   console.log(t('ws-client-message', { clientId, message }));
   try {
     const data = parseRequest<IWsRequest>(message);
@@ -22,33 +18,27 @@ function handleMessage({ ws, message, clientId }: HandleMessageParams) {
     }
     validateObject(wsRequestSchema, data);
     console.log(data);
+    const { type } = data;
+    const handleParams = {
+      ...params,
+      data,
+    };
 
-    ws.send('Hello from server');
-  } catch (error) {
-    if (error instanceof Error) {
-      ws.send(
-        JSON.stringify({
-          type: wsTypes.unknown,
-          data: {
-            error: true,
-            errorText: error.message,
-          },
-          id: 0,
-        })
-      );
-      console.log('ws error: ', error.message);
-    } else {
-      ws.send(
-        JSON.stringify({
-          type: wsTypes.unknown,
-          data: {
-            error: true,
-            errorText: t('server-unknown-error'),
-          },
-          id: 0,
-        })
-      );
+    switch (type) {
+      case wsTypes.reg:
+        handleRegUser(handleParams);
+        break;
+      default:
+        break;
     }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : t('server-unknown-error');
+    wsSend(ws, {
+      type: wsTypes.error,
+      error: true,
+      errorText: message,
+    });
+    console.log('ws error:', message);
   }
 }
 

@@ -1,12 +1,11 @@
 import ServerInvalidJSONFormatError from '../errors/ServerInvalidJSONFormatError';
-import ServerDataNeedError from '../errors/ServerDataNeedError';
 
-function parseRequest<T>(data: string): T {
+function parseRequest<T = Record<PropertyKey, any>>(data: string): T {
   try {
     return JSON.parse(data);
   } catch (error: unknown) {
     if (!data) {
-      throw new ServerDataNeedError();
+      return {} as T;
     }
     throw new ServerInvalidJSONFormatError();
   }
