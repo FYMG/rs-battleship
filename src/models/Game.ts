@@ -1,10 +1,16 @@
 import * as console from 'node:console';
+import * as crypto from 'node:crypto';
 import IUser from './IUser';
 import IRoom from './IRoom';
 import wsSend from '../utils/helpers/wsSend';
 import { wsTypes } from '../utils/consts';
 import updateWinnersBroadcast from '../app/router/user/updateWinnersBroadcast';
 import { increaseUserWins } from '../data';
+
+export interface ICell {
+  x: number;
+  y: number;
+}
 
 export interface IShip {
   position: {
@@ -143,79 +149,41 @@ export default class Game {
       throw new Error('Opponent ships not found');
     }
 
+    if (opponentDestroyedCells.some((cell) => cell.x === x && cell.y === y)) {
+      return results;
+    }
+
+    opponentDestroyedCells.push({ x, y });
     let hit = false;
-    if (!opponentDestroyedCells.some((cell) => cell.x === x && cell.y === y)) {
-      opponentDestroyedCells.push({ x, y });
-      for (const ship of opponentShips) {
-        for (let i = 0; i < ship.length; i++) {
-          const shipX = !ship.direction ? ship.position.x + i : ship.position.x;
-          const shipY = !ship.direction ? ship.position.y : ship.position.y + i;
 
-          if (shipX === x && shipY === y) {
-            hit = true;
+    for (const ship of opponentShips) {
+      const shipCells = this.getShipCells(ship);
 
-            const isKilled =
-              opponentDestroyedCells.filter((cell) => {
-                for (let j = 0; j < ship.length; j++) {
-                  const sx = !ship.direction ? ship.position.x + j : ship.position.x;
-                  const sy = !ship.direction ? ship.position.y : ship.position.y + j;
-                  if (cell.x === sx && cell.y === sy) {
-                    return true;
-                  }
-                }
-                return false;
-              }).length === ship.length;
+      if (shipCells.some((cell) => cell.x === x && cell.y === y)) {
+        hit = true;
+        const isKilled = shipCells.every((cell) =>
+          opponentDestroyedCells.some(
+            (destroyedCell) => destroyedCell.x === cell.x && destroyedCell.y === cell.y
+          )
+        );
 
-            results.push({
-              position: { x, y },
-              currentPlayer: this.currentPlayerIndex,
-              status: isKilled ? 'killed' : 'shot',
-            });
+        results.push({
+          position: { x, y },
+          currentPlayer: this.currentPlayerIndex,
+          status: isKilled ? 'killed' : 'shot',
+        });
 
-            if (isKilled) {
-              const allShipsDestroyed = opponentShips.every(
-                (ship) =>
-                  ship.length ===
-                  opponentDestroyedCells.filter((cell) => {
-                    for (let j = 0; j < ship.length; j++) {
-                      const sx = !ship.direction ? ship.position.x + j : ship.position.x;
-                      const sy = !ship.direction ? ship.position.y : ship.position.y + j;
-                      if (cell.x === sx && cell.y === sy) {
-                        return true;
-                      }
-                    }
-                    return false;
-                  }).length
-              );
-
-              if (allShipsDestroyed) {
-                this.finish(playerIndex);
-              } else {
-                const surroundingCells = this.getSurroundingCells(ship);
-                for (const cell of surroundingCells) {
-                  if (
-                    !opponentDestroyedCells.some(
-                      (destroyedCell) =>
-                        destroyedCell.x === cell.x && destroyedCell.y === cell.y
-                    )
-                  ) {
-                    opponentDestroyedCells.push(cell);
-                    results.push({
-                      position: cell,
-                      currentPlayer: this.currentPlayerIndex,
-                      status: 'miss',
-                    });
-                  }
-                }
-              }
-            }
-            break;
+        if (isKilled) {
+          if (
+            opponentShips.every((s) => this.isShipDestroyed(s, opponentDestroyedCells))
+          ) {
+            this.finish(playerIndex);
+          } else {
+            this.addSurroundingCells(ship, opponentDestroyedCells, results);
           }
         }
-        if (hit) break;
+        break;
       }
-    } else {
-      return results;
     }
 
     if (!hit) {
@@ -224,17 +192,61 @@ export default class Game {
         currentPlayer: this.currentPlayerIndex,
         status: 'miss',
       });
-      this.currentPlayerIndex =
-        this.currentPlayerIndex === this.player1.index
-          ? this.player2.index
-          : this.player1.index;
-
+      this.switchPlayer();
       if (this.currentPlayerIndex === '-1') {
         results = [...results, ...this.botMove()];
       }
     }
 
     return results;
+  }
+
+  private getShipCells(ship: IShip): ICell[] {
+    const cells: ICell[] = [];
+    for (let i = 0; i < ship.length; i += 1) {
+      cells.push({
+        x: ship.direction ? ship.position.x : ship.position.x + i,
+        y: ship.direction ? ship.position.y + i : ship.position.y,
+      });
+    }
+    return cells;
+  }
+
+  private isShipDestroyed(ship: IShip, destroyedCells: ICell[]): boolean {
+    return this.getShipCells(ship).every((cell) =>
+      destroyedCells.some(
+        (destroyedCell) => destroyedCell.x === cell.x && destroyedCell.y === cell.y
+      )
+    );
+  }
+
+  private addSurroundingCells(
+    ship: IShip,
+    destroyedCells: ICell[],
+    results: IAttackResult[]
+  ): void {
+    const surroundingCells = this.getSurroundingCells(ship);
+    for (const cell of surroundingCells) {
+      if (
+        !destroyedCells.some(
+          (destroyedCell) => destroyedCell.x === cell.x && destroyedCell.y === cell.y
+        )
+      ) {
+        destroyedCells.push(cell);
+        results.push({
+          position: cell,
+          currentPlayer: this.currentPlayerIndex,
+          status: 'miss',
+        });
+      }
+    }
+  }
+
+  private switchPlayer(): void {
+    this.currentPlayerIndex =
+      this.currentPlayerIndex === this.player1.index
+        ? this.player2.index
+        : this.player1.index;
   }
 
   turn() {
@@ -248,8 +260,8 @@ export default class Game {
     const endX = !ship.direction ? ship.position.x + ship.length : ship.position.x + 1;
     const endY = !ship.direction ? ship.position.y + 1 : ship.position.y + ship.length;
 
-    for (let x = startX; x <= endX; x++) {
-      for (let y = startY; y <= endY; y++) {
+    for (let x = startX; x <= endX; x += 1) {
+      for (let y = startY; y <= endY; y += 1) {
         if (x >= 0 && x < 10 && y >= 0 && y < 10) {
           cells.push({ x, y });
         }
@@ -263,8 +275,8 @@ export default class Game {
     const result: IAttackResult[] = [];
 
     while (this.currentPlayerIndex === '-1') {
-      const x = Math.floor(Math.random() * 10);
-      const y = Math.floor(Math.random() * 10);
+      const x = crypto.randomInt(1, 11);
+      const y = crypto.randomInt(1, 11);
       result.push(...this.attack('-1', x, y));
     }
 

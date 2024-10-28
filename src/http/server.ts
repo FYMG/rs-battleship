@@ -8,17 +8,21 @@ interface StartParams {
 }
 
 function start({ port }: StartParams) {
-  const httpServer = http.createServer(function (req, res) {
-    const __dirname = path.resolve(path.dirname(''));
-    const file_path =
-      __dirname + (req.url === '/' ? '/front/index.html' : `/front${req.url}`);
-    fs.readFile(file_path, function (err, data) {
+  const httpServer = http.createServer((req, res) => {
+    const dirName = path.resolve();
+    const filePath = path.join(
+      dirName,
+      'front',
+      req.url! === '/' ? 'index.html' : req.url!
+    );
+
+    fs.readFile(filePath, (err, data) => {
       if (err) {
-        res.writeHead(404);
-        res.end(JSON.stringify(err));
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'File not found' }));
         return;
       }
-      res.writeHead(200);
+      res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(data);
     });
   });

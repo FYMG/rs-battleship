@@ -13,6 +13,11 @@ module.exports = {
   },
   ignorePatterns: ['.eslintrc.js'],
   rules: {
+    'sonarjs/no-hardcoded-credentials': 'off',
+    'no-restricted-syntax': 'off',
+    'sonarjs/cognitive-complexity': ['error', 25],
+    'sonarjs/no-empty-collection': 'off',
+    'import/no-cycle': 'off',
     'prettier/prettier': 'error',
     'class-methods-use-this': 'off',
     'import/prefer-default-export': 'off',

@@ -99,7 +99,7 @@ function handleSinglePlay(params: IHandleDataParams) {
     },
     player2: {
       name: 'BOT',
-      password: 'BOT4241',
+      password: 'not-a-password',
       wins: 0,
       clientId: '-1',
       ws: null,

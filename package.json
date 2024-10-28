@@ -5,12 +5,12 @@
   "main": "src/main.ts",
   "scripts": {
     "test": "jest",
-    "start:prod": "tsc && node dist/main.js",
+    "start": "tsc && node dist/main.js",
     "start:dev": "nodemon --watch 'src/**/*.ts' src/main.ts -x ts-node-dev",
     "build": "tsc",
     "test:verbose": "jest",
     "prettier": "prettier --write **/*.{ts,js,json,md}",
-    "eslint": "eslint src/**/*.ts --fix"
+    "lint": "eslint src/**/*.ts --fix"
   },
   "dependencies": {
     "cross-env": "^7.0.3",

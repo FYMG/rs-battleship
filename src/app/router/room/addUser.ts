@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import IHandleDataParams from '../../../models/HandleDataParams';
 import validateObject from '../../../utils/helpers/validateObject';
 import { gamesMap, getRoomById, getUserByClientId, getUserByName } from '../../../data';
@@ -68,7 +69,7 @@ function handleAddUserToRoom(params: IHandleDataParams) {
       return;
     }
 
-    const indexPlayer = Math.random() > 0.5 ? 0 : 1;
+    const indexPlayer = crypto.randomInt(0, 2);
 
     const game = new Game({
       room,

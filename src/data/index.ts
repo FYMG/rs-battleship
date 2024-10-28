@@ -6,16 +6,16 @@ import Game from '../models/Game';
 export const usersMap = new Map<string, IUser>();
 
 export const getUsersList = () => Array.from(usersMap.values());
+export const getUserByName = (name: string) =>
+  Array.from(usersMap.values()).find((p) => p.name === name);
+export const getUserByClientId = (clientId: string) =>
+  Array.from(usersMap.values()).find((p) => p.clientId === clientId);
 export const increaseUserWins = (name: string) => {
   const user = getUserByName(name);
   if (user) {
     user.wins += 1;
   }
 };
-export const getUserByName = (name: string) =>
-  Array.from(usersMap.values()).find((p) => p.name === name);
-export const getUserByClientId = (clientId: string) =>
-  Array.from(usersMap.values()).find((p) => p.clientId === clientId);
 export const getWinnersList = () =>
   getUsersList()
     .sort((a, b) => b.wins - a.wins)

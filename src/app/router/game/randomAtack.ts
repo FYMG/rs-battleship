@@ -1,3 +1,4 @@
+import * as crypto from 'node:crypto';
 import IHandleDataParams from '../../../models/HandleDataParams';
 import validateObject from '../../../utils/helpers/validateObject';
 import handleAttackShips from './atack';
@@ -12,8 +13,8 @@ function handleRandomAttackShips(params: IHandleDataParams) {
   validateObject(gameRandomAttackShipsSchema, data.data);
   const newData = {
     ...data.data,
-    x: Math.floor(Math.random() * 10),
-    y: Math.floor(Math.random() * 10),
+    x: crypto.randomInt(1, 11),
+    y: crypto.randomInt(1, 11),
   };
   handleAttackShips({
     ...params,
