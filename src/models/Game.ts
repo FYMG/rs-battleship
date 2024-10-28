@@ -1,3 +1,4 @@
+import * as console from 'node:console';
 import IUser from './IUser';
 import IRoom from './IRoom';
 import wsSend from '../utils/helpers/wsSend';
@@ -49,15 +50,20 @@ export default class Game {
 
   gameStarted = false;
 
+  singlePlayer = false;
+
   constructor({
     player1,
     player2,
     room,
+    singlePlayer = false,
   }: {
     player1: IGameUser;
     player2: IGameUser;
     room: IRoom;
+    singlePlayer?: boolean;
   }) {
+    this.singlePlayer = singlePlayer;
     this.id = room.roomId;
     this.room = room;
     this.player1 = player1;
@@ -84,8 +90,6 @@ export default class Game {
             ships: this.player1Ships,
           },
         });
-      } else {
-        this.finish(this.player2.index);
       }
       if (this.player2.ws) {
         wsSend(this.player2.ws, {
@@ -95,8 +99,6 @@ export default class Game {
             ships: this.player2Ships,
           },
         });
-      } else {
-        this.finish(this.player1.index);
       }
     }
   }
@@ -135,80 +137,85 @@ export default class Game {
       playerIndex === this.player1.index
         ? this.player2DestroyedCells
         : this.player1DestroyedCells;
-    const results: IAttackResult[] = [];
+    let results: IAttackResult[] = [];
 
     if (!opponentShips) {
       throw new Error('Opponent ships not found');
     }
 
     let hit = false;
-    for (const ship of opponentShips) {
-      for (let i = 0; i < ship.length; i++) {
-        const shipX = !ship.direction ? ship.position.x + i : ship.position.x;
-        const shipY = !ship.direction ? ship.position.y : ship.position.y + i;
+    if (!opponentDestroyedCells.some((cell) => cell.x === x && cell.y === y)) {
+      opponentDestroyedCells.push({ x, y });
+      for (const ship of opponentShips) {
+        for (let i = 0; i < ship.length; i++) {
+          const shipX = !ship.direction ? ship.position.x + i : ship.position.x;
+          const shipY = !ship.direction ? ship.position.y : ship.position.y + i;
 
-        if (shipX === x && shipY === y) {
-          hit = true;
-          opponentDestroyedCells.push({ x, y });
+          if (shipX === x && shipY === y) {
+            hit = true;
 
-          const isKilled =
-            opponentDestroyedCells.filter((cell) => {
-              for (let j = 0; j < ship.length; j++) {
-                const sx = !ship.direction ? ship.position.x + j : ship.position.x;
-                const sy = !ship.direction ? ship.position.y : ship.position.y + j;
-                if (cell.x === sx && cell.y === sy) {
-                  return true;
-                }
-              }
-              return false;
-            }).length === ship.length;
-
-          results.push({
-            position: { x, y },
-            currentPlayer: this.currentPlayerIndex,
-            status: isKilled ? 'killed' : 'shot',
-          });
-
-          if (isKilled) {
-            const allShipsDestroyed = opponentShips.every(
-              (ship) =>
-                ship.length ===
-                opponentDestroyedCells.filter((cell) => {
-                  for (let j = 0; j < ship.length; j++) {
-                    const sx = !ship.direction ? ship.position.x + j : ship.position.x;
-                    const sy = !ship.direction ? ship.position.y : ship.position.y + j;
-                    if (cell.x === sx && cell.y === sy) {
-                      return true;
-                    }
+            const isKilled =
+              opponentDestroyedCells.filter((cell) => {
+                for (let j = 0; j < ship.length; j++) {
+                  const sx = !ship.direction ? ship.position.x + j : ship.position.x;
+                  const sy = !ship.direction ? ship.position.y : ship.position.y + j;
+                  if (cell.x === sx && cell.y === sy) {
+                    return true;
                   }
-                  return false;
-                }).length
-            );
+                }
+                return false;
+              }).length === ship.length;
 
-            if (allShipsDestroyed) {
-              this.finish(playerIndex);
-            } else {
-              const surroundingCells = this.getSurroundingCells(ship);
-              for (const cell of surroundingCells) {
-                if (
-                  !opponentDestroyedCells.some(
-                    (destroyedCell) =>
-                      destroyedCell.x === cell.x && destroyedCell.y === cell.y
-                  )
-                ) {
-                  results.push({
-                    position: cell,
-                    currentPlayer: this.currentPlayerIndex,
-                    status: 'miss',
-                  });
+            results.push({
+              position: { x, y },
+              currentPlayer: this.currentPlayerIndex,
+              status: isKilled ? 'killed' : 'shot',
+            });
+
+            if (isKilled) {
+              const allShipsDestroyed = opponentShips.every(
+                (ship) =>
+                  ship.length ===
+                  opponentDestroyedCells.filter((cell) => {
+                    for (let j = 0; j < ship.length; j++) {
+                      const sx = !ship.direction ? ship.position.x + j : ship.position.x;
+                      const sy = !ship.direction ? ship.position.y : ship.position.y + j;
+                      if (cell.x === sx && cell.y === sy) {
+                        return true;
+                      }
+                    }
+                    return false;
+                  }).length
+              );
+
+              if (allShipsDestroyed) {
+                this.finish(playerIndex);
+              } else {
+                const surroundingCells = this.getSurroundingCells(ship);
+                for (const cell of surroundingCells) {
+                  if (
+                    !opponentDestroyedCells.some(
+                      (destroyedCell) =>
+                        destroyedCell.x === cell.x && destroyedCell.y === cell.y
+                    )
+                  ) {
+                    opponentDestroyedCells.push(cell);
+                    results.push({
+                      position: cell,
+                      currentPlayer: this.currentPlayerIndex,
+                      status: 'miss',
+                    });
+                  }
                 }
               }
             }
+            break;
           }
-          break;
         }
+        if (hit) break;
       }
-      if (hit) break;
+    } else {
+      return results;
     }
 
     if (!hit) {
@@ -221,6 +228,10 @@ export default class Game {
         this.currentPlayerIndex === this.player1.index
           ? this.player2.index
           : this.player1.index;
+
+      if (this.currentPlayerIndex === '-1') {
+        results = [...results, ...this.botMove()];
+      }
     }
 
     return results;
@@ -246,5 +257,19 @@ export default class Game {
     }
 
     return cells;
+  }
+
+  botMove() {
+    const result: IAttackResult[] = [];
+
+    while (this.currentPlayerIndex === '-1') {
+      const x = Math.floor(Math.random() * 10);
+      const y = Math.floor(Math.random() * 10);
+      result.push(...this.attack('-1', x, y));
+    }
+
+    console.log('Bot move: ', result);
+
+    return result;
   }
 }

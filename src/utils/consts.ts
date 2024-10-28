@@ -11,6 +11,7 @@ const wsTypes = {
   finish: 'finish',
   turn: 'turn',
   attack: 'attack',
+  single_play: 'single_play',
   randomAttack: 'randomAttack',
 };
 

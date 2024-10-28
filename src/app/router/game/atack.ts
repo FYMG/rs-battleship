@@ -44,28 +44,38 @@ function handleAttackShips(params: IHandleDataParams) {
   const results = game.attack(indexPlayer, x, y);
 
   results.forEach((result) => {
-    wsSend(game.player1.ws!, {
-      type: wsTypes.attack,
-      data: result,
-    });
-    wsSend(game.player2.ws!, {
-      type: wsTypes.attack,
-      data: result,
-    });
+    if (game.player1.ws) {
+      wsSend(game.player1.ws, {
+        type: wsTypes.attack,
+        data: result,
+      });
+    }
+
+    if (game.player2.ws) {
+      wsSend(game.player2.ws, {
+        type: wsTypes.attack,
+        data: result,
+      });
+    }
   });
 
-  wsSend(game.player1.ws!, {
-    type: wsTypes.turn,
-    data: {
-      currentPlayer: game.currentPlayerIndex,
-    },
-  });
-  wsSend(game.player2.ws!, {
-    type: wsTypes.turn,
-    data: {
-      currentPlayer: game.currentPlayerIndex,
-    },
-  });
+  if (game.player1.ws!) {
+    wsSend(game.player1.ws!, {
+      type: wsTypes.turn,
+      data: {
+        currentPlayer: game.currentPlayerIndex,
+      },
+    });
+  }
+
+  if (game.player2.ws!) {
+    wsSend(game.player2.ws!, {
+      type: wsTypes.turn,
+      data: {
+        currentPlayer: game.currentPlayerIndex,
+      },
+    });
+  }
 }
 
 export default handleAttackShips;

@@ -12,6 +12,7 @@ import handleAddUserToRoom from './room/addUser';
 import handleGameAddShips from './game/addShips';
 import handleRandomAttackShips from './game/randomAtack';
 import handleAttackShips from './game/atack';
+import handleSinglePlay from './room/singlePlay';
 
 function handleMessage(params: IHandleMessageParams) {
   const { ws, message, clientId } = params;
@@ -44,6 +45,9 @@ function handleMessage(params: IHandleMessageParams) {
         break;
       case wsTypes.randomAttack:
         handleRandomAttackShips(handleParams);
+        break;
+      case wsTypes.single_play:
+        handleSinglePlay(handleParams);
         break;
       default:
         break;
