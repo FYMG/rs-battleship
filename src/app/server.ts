@@ -18,7 +18,7 @@ function start({ port }: StartParams) {
       t('server-started', {
         port: String(port),
         serverName: 'RS Battleship webSocket server',
-        url: 'localhost',
+        url: 'ws://localhost',
       })
     )
   );

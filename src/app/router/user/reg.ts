@@ -38,6 +38,7 @@ function handleRegUser(params: IHandleDataParams) {
       type: wsTypes.reg,
       error: true,
       errorText: t('wrong-reg-data'),
+      withError: true,
       data: {
         name,
         index: clientId,
@@ -51,17 +52,14 @@ function handleRegUser(params: IHandleDataParams) {
 
   usersMap.set(clientId, user);
 
-  wsSend(
-    ws,
-    {
-      type: wsTypes.reg,
-      data: {
-        name,
-        index: clientId,
-      },
+  wsSend(ws, {
+    type: wsTypes.reg,
+    withError: true,
+    data: {
+      name,
+      index: clientId,
     },
-    true
-  );
+  });
 
   if (!userExists) {
     updateWinnersBroadcast(params);

@@ -1,5 +1,6 @@
 import IUser from '../models/IUser';
 import IRoom from '../models/IRoom';
+import Game from '../models/Game';
 
 export const usersMap = new Map<string, IUser>();
 
@@ -25,6 +26,7 @@ export const createRoom = () => {
   roomsMap.set(roomId, room);
   return room;
 };
+export const getRoomById = (id: string) => roomsMap.get(id);
 export const getWaitingRoomList = () =>
   Array.from(roomsMap.values())
     .filter((p) => !p.gameStarted)
@@ -34,3 +36,5 @@ export const getWaitingRoomList = () =>
         roomUsers: p.roomUsers,
       };
     });
+
+export const gamesMap = new Map<string, Game>();

@@ -9,13 +9,14 @@ function wsSend(
     data = {},
     error = false,
     errorText = '',
+    withError = error,
   }: {
     type: (typeof wsTypes)[keyof typeof wsTypes];
     data?: any;
     error?: boolean;
     errorText?: string;
-  },
-  withError = false
+    withError?: boolean;
+  }
 ) {
   const msg = JSON.stringify({
     type,

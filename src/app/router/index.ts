@@ -8,6 +8,8 @@ import IHandleMessageParams from '../../models/HandleMessageParams';
 import handleRegUser from './user/reg';
 import wsSend from '../../utils/helpers/wsSend';
 import handleCreateRoom from './room/create';
+import handleAddUserToRoom from './room/addUser';
+import handleGameAddShips from './game/addShips';
 
 function handleMessage(params: IHandleMessageParams) {
   const { ws, message, clientId } = params;
@@ -28,6 +30,12 @@ function handleMessage(params: IHandleMessageParams) {
         break;
       case wsTypes.createRoom:
         handleCreateRoom(handleParams);
+        break;
+      case wsTypes.addUserToRoom:
+        handleAddUserToRoom(handleParams);
+        break;
+      case wsTypes.addShip:
+        handleGameAddShips(handleParams);
         break;
       default:
         break;

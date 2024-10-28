@@ -12,6 +12,7 @@ function handleCreateRoom(params: IHandleDataParams) {
       type: wsTypes.createRoom,
       error: true,
       errorText: 'User not found',
+      withError: true,
     });
     return;
   }
