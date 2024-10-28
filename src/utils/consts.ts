@@ -6,7 +6,12 @@ const wsTypes = {
   createRoom: 'create_room',
   updateRoom: 'update_room',
   create_game: 'create_game',
+  startGame: 'start_game',
   addShip: 'add_ships',
+  finish: 'finish',
+  turn: 'turn',
+  attack: 'attack',
+  randomAttack: 'randomAttack',
 };
 
 export { wsTypes };

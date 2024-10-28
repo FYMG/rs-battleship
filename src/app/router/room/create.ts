@@ -23,7 +23,7 @@ function handleCreateRoom(params: IHandleDataParams) {
     index: user.clientId,
   });
 
-  updateRoomBroadcast(params);
+  updateRoomBroadcast();
 }
 
 export default handleCreateRoom;

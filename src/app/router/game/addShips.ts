@@ -1,4 +1,3 @@
-import * as console from 'node:console';
 import IHandleDataParams from '../../../models/HandleDataParams';
 import validateObject from '../../../utils/helpers/validateObject';
 import { IShip } from '../../../models/Game';
@@ -52,7 +51,6 @@ function handleGameAddShips(params: IHandleDataParams) {
   }
 
   game.addShips(indexPlayer, ships);
-  console.log(game);
 }
 
 export default handleGameAddShips;

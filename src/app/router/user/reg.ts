@@ -50,8 +50,6 @@ function handleRegUser(params: IHandleDataParams) {
   user.ws = ws;
   user.clientId = clientId;
 
-  usersMap.set(clientId, user);
-
   wsSend(ws, {
     type: wsTypes.reg,
     withError: true,
@@ -62,7 +60,8 @@ function handleRegUser(params: IHandleDataParams) {
   });
 
   if (!userExists) {
-    updateWinnersBroadcast(params);
+    usersMap.set(clientId, user);
+    updateWinnersBroadcast();
   } else {
     updateWinners(params);
   }

@@ -53,6 +53,7 @@ function handleAddUserToRoom(params: IHandleDataParams) {
   });
 
   if (room.roomUsers.length === 2) {
+    room.gameStarted = true;
     const opponent = getUserByName(
       room.roomUsers.find((p) => p.name !== user.name)!.name
     );
@@ -100,7 +101,7 @@ function handleAddUserToRoom(params: IHandleDataParams) {
     gamesMap.set(game.id, game);
   }
 
-  updateRoomBroadcast(params);
+  updateRoomBroadcast();
 }
 
 export default handleAddUserToRoom;

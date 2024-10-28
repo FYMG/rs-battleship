@@ -2,13 +2,13 @@ import { WebSocketServer, WebSocket } from 'ws';
 import * as console from 'node:console';
 import { t } from '../utils/loc';
 import handleMessage from './router';
+import { clients } from '../data';
 
 export interface StartParams {
   port: number;
 }
 
 function start({ port }: StartParams) {
-  const clients = new Map<string, WebSocket>();
   let id = 0;
 
   const wss = new WebSocketServer({ port });

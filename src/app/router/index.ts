@@ -10,6 +10,8 @@ import wsSend from '../../utils/helpers/wsSend';
 import handleCreateRoom from './room/create';
 import handleAddUserToRoom from './room/addUser';
 import handleGameAddShips from './game/addShips';
+import handleRandomAttackShips from './game/randomAtack';
+import handleAttackShips from './game/atack';
 
 function handleMessage(params: IHandleMessageParams) {
   const { ws, message, clientId } = params;
@@ -36,6 +38,12 @@ function handleMessage(params: IHandleMessageParams) {
         break;
       case wsTypes.addShip:
         handleGameAddShips(handleParams);
+        break;
+      case wsTypes.attack:
+        handleAttackShips(handleParams);
+        break;
+      case wsTypes.randomAttack:
+        handleRandomAttackShips(handleParams);
         break;
       default:
         break;

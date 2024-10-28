@@ -1,3 +1,4 @@
+import { WebSocket } from 'ws';
 import IUser from '../models/IUser';
 import IRoom from '../models/IRoom';
 import Game from '../models/Game';
@@ -5,6 +6,12 @@ import Game from '../models/Game';
 export const usersMap = new Map<string, IUser>();
 
 export const getUsersList = () => Array.from(usersMap.values());
+export const increaseUserWins = (name: string) => {
+  const user = getUserByName(name);
+  if (user) {
+    user.wins += 1;
+  }
+};
 export const getUserByName = (name: string) =>
   Array.from(usersMap.values()).find((p) => p.name === name);
 export const getUserByClientId = (clientId: string) =>
@@ -38,3 +45,5 @@ export const getWaitingRoomList = () =>
     });
 
 export const gamesMap = new Map<string, Game>();
+
+export const clients = new Map<string, WebSocket>();
